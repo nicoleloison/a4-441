@@ -31,14 +31,13 @@ unsigned int int_to_binary(unsigned int k) {
 
 unsigned int level_from_id(unsigned int node_id){
     int level = log10(node_id) / log10(2);
-    printf("node level:\t%d\n", level);
     return level;
 }
 
 /* tree structure */
 typedef struct tree
 {
-    int id;
+    int id, level;
     struct tree *left;
     struct tree *right;
 }node;
@@ -47,10 +46,12 @@ typedef struct tree
 node *create();
 void insert(node *,node *);
 void preorder(node *);
+
 struct node
 {
     int id;
     int data;
+    int level;
     struct node *left;
     struct node *right;
 };
@@ -60,8 +61,9 @@ node *create(int id)
     node *temp;
     temp=(node*)malloc(sizeof(node));
     temp->id  = int_to_binary(id-1);
+    temp->level  = level_from_id(id);
     temp->left=temp->right=NULL;
-    printf("created node with id:%d\t", temp->id);
+    printf("created node with id:\t%d at level:\t %d \n", temp->id, temp->level);
     return temp;
 }
 
@@ -126,7 +128,7 @@ int main()
         else
             insert(root,temp);
         
-        level_from_id(j);
+        //level_from_id(j);
         j++;
         
     }
