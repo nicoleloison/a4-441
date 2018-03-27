@@ -21,10 +21,21 @@
 #include <strings.h>
 #include <netdb.h>
 #include <stdbool.h>
+/** max number of nodes = 2 ^ level **/
+int max_level = 3;
 
-int max_level = 10;
 
+unsigned int int_to_binary(unsigned int k) {
+    return (k == 0 || k == 1 ? k : ((k % 2) + 10 * int_to_binary(k / 2)));
+}
+/** helper functions **/
+unsigned int get_level(unsigned int node_id){
+    int level = log10(node_id) / log10(2);
+    printf("node level:\t%d\n", level);
+    return level;
+}
 
+/* tree structure */
 typedef struct tree
 {
     int id;
@@ -32,26 +43,10 @@ typedef struct tree
     struct tree *right;
 }node;
 
+/* node struc and helper functions */
 node *create();
 void insert(node *,node *);
 void preorder(node *);
-
-unsigned int int_to_binary(unsigned int k) {
-    return (k == 0 || k == 1 ? k : ((k % 2) + 10 * int_to_binary(k / 2)));
-}
-
-int node_level(unsigned int k) {
-    int level = pow(2, k) - 1 ;
-    printf("node id is:\t%d, level:\t%d\n", k,  level);
-    return level;
-}
-
-unsigned int get_level(unsigned int node_id){
-    int level = log10(node_id) / log10(2);
-    printf("node id is:\t%d, level:\t%d\n", node_id, level);
-    return level;
-}
-
 struct node
 {
     int id;
@@ -88,7 +83,7 @@ void insert(node *root,node *temp)
             root->right=temp;
     }
 }
-
+/* recursive printing of nodes in tree increasing order*/
 void preorder(node *root)
 {
     if(root!=NULL)
@@ -100,23 +95,10 @@ void preorder(node *root)
 }
 
 
-
+/****************** main ******************/
 int main()
 {
-    unsigned long long factorial = 1;
-    // show error if the user enters a negative integer
-    if (max_level < 0)
-        printf("Error! max level of a negative number doesn't exist.");
-    
-    else
-    {
-        for(int i=1; i<=max_level; ++i)
-        {
-            factorial *= i;              // factorial = factorial*i;
-        }
-        printf("Factorial of %d = %llu\n", max_level, factorial);
-    }
-    
+    int n = pow(2, max_level);
     int j =1;
     /*create root*/
     node *root=NULL,*temp;
@@ -132,7 +114,7 @@ int main()
         get_level(j);
         j++;
         
-    }while(j < max_level+1);
+    }while(j < n);
     
     printf("\n Preorder Traversal: ");
     preorder(root);
