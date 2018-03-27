@@ -22,7 +22,7 @@
 #include <netdb.h>
 #include <stdbool.h>
 
-int max_level = 4;
+int max_level = 10;
 
 
 typedef struct tree
@@ -64,8 +64,9 @@ node *create(int id)
 {
     node *temp;
     temp=(node*)malloc(sizeof(node));
-    temp->id  = id;
+    temp->id  = id-1;
     temp->left=temp->right=NULL;
+    printf("created node with id:%d\t", temp->id);
     return temp;
 }
 
@@ -120,7 +121,7 @@ int main()
     /*create root*/
     node *root=NULL,*temp;
     
-    while(j < factorial)
+    do
     {
         temp=create(j);
         if(root==NULL)
@@ -129,9 +130,9 @@ int main()
             insert(root,temp);
         
         get_level(j);
-        j ++;
+        j++;
         
-    }
+    }while(j < max_level+1);
     
     printf("\n Preorder Traversal: ");
     preorder(root);
