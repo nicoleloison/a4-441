@@ -24,11 +24,11 @@
 /** max number of nodes = 2 ^ level **/
 int max_level = 3;
 
-
+/** helper functions **/
 unsigned int int_to_binary(unsigned int k) {
     return (k == 0 || k == 1 ? k : ((k % 2) + 10 * int_to_binary(k / 2)));
 }
-/** helper functions **/
+
 unsigned int get_level(unsigned int node_id){
     int level = log10(node_id) / log10(2);
     printf("node level:\t%d\n", level);
@@ -93,17 +93,35 @@ void preorder(node *root)
         preorder(root->right);
     }
 }
-
+/* returns the factorial of int n
+ we want 2^level nodes at the bottom level
+ total # of nodes = facotrial # of nodes at bottom level*/
+int total_nodes(int n ){
+    int total = 0;
+    do
+    {
+        total = total + pow(2, n);
+        printf("Loop n:%d, total: %d \n",n,  total);
+        n --;
+        // factorial = factorial*i;
+    }while(n>=0);
+    
+    printf("Total number of nodes: %d.\n", total);
+    
+    return total;
+}
 
 /****************** main ******************/
 int main()
 {
-    int n = pow(2, max_level);
+    int levels = pow(2, max_level);
     int j =1;
+    
+    int n = total_nodes(3);//test value with 4 levels.
     /*create root*/
     node *root=NULL,*temp;
     
-    do
+    while(j <= n)
     {
         temp=create(j);
         if(root==NULL)
@@ -114,7 +132,7 @@ int main()
         get_level(j);
         j++;
         
-    }while(j < n);
+    }
     
     printf("\n Preorder Traversal: ");
     preorder(root);
