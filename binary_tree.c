@@ -29,7 +29,7 @@ unsigned int int_to_binary(unsigned int k) {
     return (k == 0 || k == 1 ? k : ((k % 2) + 10 * int_to_binary(k / 2)));
 }
 
-unsigned int get_level(unsigned int node_id){
+unsigned int level_from_id(unsigned int node_id){
     int level = log10(node_id) / log10(2);
     printf("node level:\t%d\n", level);
     return level;
@@ -59,7 +59,7 @@ node *create(int id)
 {
     node *temp;
     temp=(node*)malloc(sizeof(node));
-    temp->id  = id-1;
+    temp->id  = int_to_binary(id-1);
     temp->left=temp->right=NULL;
     printf("created node with id:%d\t", temp->id);
     return temp;
@@ -95,29 +95,26 @@ void preorder(node *root)
 }
 /* returns the factorial of int n
  we want 2^level nodes at the bottom level
- total # of nodes = facotrial # of nodes at bottom level*/
+ total # of nodes = sum of nodes at each level*/
 int total_nodes(int n ){
     int total = 0;
     do
     {
         total = total + pow(2, n);
-        printf("Loop n:%d, total: %d \n",n,  total);
         n --;
-        // factorial = factorial*i;
     }while(n>=0);
     
-    printf("Total number of nodes: %d.\n", total);
-    
+  //  printf("Total number of nodes: %d.\n", total);
     return total;
 }
 
-/****************** main ******************/
+/****************************** main ***************************/
 int main()
 {
-    int levels = pow(2, max_level);
+    //int levels = pow(2, max_level);
     int j =1;
     
-    int n = total_nodes(3);//test value with 4 levels.
+    int n = total_nodes(max_level);//test value with 4 levels.
     /*create root*/
     node *root=NULL,*temp;
     
@@ -129,7 +126,7 @@ int main()
         else
             insert(root,temp);
         
-        get_level(j);
+        level_from_id(j);
         j++;
         
     }
