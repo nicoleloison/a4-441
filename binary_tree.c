@@ -6,21 +6,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <netinet/in.h>
-
 #include <string.h>
-
+#include <time.h>
 #include <math.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <signal.h>
-#include <strings.h>
-#include <netdb.h>
+//#include <strings.h>
 #include <stdbool.h>
+
 /** max number of nodes = 2 ^ level **/
 int max_level = 3;
 
@@ -50,7 +41,7 @@ void preorder(node *);
 struct node
 {
     int id;
-    int data;
+    bool data;
     int level;
     struct node *left;
     struct node *right;
@@ -63,7 +54,7 @@ node *create(int id)
     temp->id  = int_to_binary(id-1);
     temp->level  = level_from_id(id);
     temp->left=temp->right=NULL;
-    printf("created node with id:\t%d at level:\t %d \n", temp->id, temp->level);
+    printf("created node with id:%d at level:%d \n", temp->id, temp->level);
     return temp;
 }
 
@@ -85,7 +76,8 @@ void insert(node *root,node *temp)
             root->right=temp;
     }
 }
-/* recursive printing of nodes in tree increasing order*/
+/* recursive traversal of tree and
+ printing of nodes id in tree increasing order*/
 void preorder(node *root)
 {
     if(root!=NULL)
@@ -98,25 +90,29 @@ void preorder(node *root)
 /* returns the factorial of int n
  we want 2^level nodes at the bottom level
  total # of nodes = sum of nodes at each level*/
-int total_nodes(int n ){
+int total_nodes(int n){
     int total = 0;
-    do
-    {
+    do{
         total = total + pow(2, n);
         n --;
     }while(n>=0);
-    
   //  printf("Total number of nodes: %d.\n", total);
     return total;
+}
+
+/* random number generator between 0 and n */
+int random_int(int n){
+    srand(time(NULL));   // should only be called once
+    int r = rand() % n;      // returns a pseudo-random integer between 0 and RAND_MAX
+    printf("Random between 0 and %d: %d\n",n,r);
+    return r;
 }
 
 /****************************** main ***************************/
 int main()
 {
-    //int levels = pow(2, max_level);
     int j =1;
-    
-    int n = total_nodes(max_level);//test value with 4 levels.
+    int n = total_nodes(max_level);//test value with 3 levels.
     /*create root*/
     node *root=NULL,*temp;
     
@@ -128,10 +124,11 @@ int main()
         else
             insert(root,temp);
         
-        //level_from_id(j);
         j++;
         
     }
+    
+    random_int(n);
     
     printf("\n Preorder Traversal: ");
     preorder(root);
