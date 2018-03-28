@@ -11,7 +11,6 @@
 #include <math.h>
 #include <assert.h>
 #include <errno.h>
-//#include <stdbool.h>
 
 /** max number of nodes = 2 ^ level **/
 int max_level = 3;
@@ -84,7 +83,7 @@ void preorder(node *root)
 {
     if(root!=NULL)
     {
-        printf("%d - %d\n",root->id, root->data);
+        printf("id:%d - data:%d - level%d\n",root->id, root->data, root->level);
         preorder(root->left);
         preorder(root->right);
     }
@@ -129,11 +128,13 @@ int total_nodes(int n){
 }
 
 int randRange(int n){
-    int limit, r;
+    int limit , r;
     limit = RAND_MAX - (RAND_MAX % n);
+
+   // r = (rand() % (pow(2, max_level) + 1 ))
     while((r = rand()) >= limit);
     r = r % n;
-    return r;
+    return r+n;
 }
 
 
@@ -156,7 +157,6 @@ node * transmitting(node * root,  int n){
             printf("%d - ",found->id);
             //transmitting_nodes[i] = *found;
         }
-        //printf("%d - %d\n", i, key_id);
     }
   
     return transmitting_nodes;
@@ -167,6 +167,7 @@ int main()
 {
     int j =1;
     int n = total_nodes(max_level);//test value with 3 levels.
+    int bottom = (int) pow(2, max_level);
     /*create root*/
     node *root=NULL,*temp, *rando;
     
@@ -185,8 +186,8 @@ int main()
     srand(time(NULL));
    // transmitting(root, n);
     
-    node * seekers = transmitting(root, n);
-    printf("\n Preorder Traversal: ");
+    node * seekers = transmitting(root, bottom);
+    printf("\n Preorder Traversal: \n");
     preorder(root);
     printf("\n --end--\n ");
     return 0;
