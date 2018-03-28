@@ -11,12 +11,10 @@
 #include <math.h>
 #include <assert.h>
 #include <errno.h>
-#include <stdbool.h>
+//#include <stdbool.h>
 
 /** max number of nodes = 2 ^ level **/
 int max_level = 3;
-
-static int key_id=0;
 
 /** helper functions **/
 unsigned int int_to_binary(unsigned int k) {
@@ -32,6 +30,7 @@ unsigned int level_from_id(unsigned int node_id){
 typedef struct tree
 {
     int id, level;
+    int data;
     struct tree *left;
     struct tree *right;
 }node;
@@ -43,9 +42,7 @@ void preorder(node *);
 
 struct node
 {
-    int id;
-    bool data;
-    int level;
+    int id, data, level;
     struct node *left;
     struct node *right;
 };
@@ -55,7 +52,8 @@ node *create(int id)
     node *temp;
     temp=(node*)malloc(sizeof(node));
     temp->id = id-1;
-   // temp->id  = int_to_binary(id-1);
+    temp->data = 0;
+   //temp->id  = int_to_binary(id-1);
     temp->level  = level_from_id(id);
     temp->left=temp->right=NULL;
     //printf("created node with id:%d at level:%d \n", temp->id, temp->level);
@@ -86,7 +84,7 @@ void preorder(node *root)
 {
     if(root!=NULL)
     {
-        printf("%d ",root->id);
+        printf("%d - %d\n",root->id, root->data);
         preorder(root->left);
         preorder(root->right);
     }
@@ -148,13 +146,15 @@ node * transmitting(node * root,  int n){
     
    // int * keys = random_keys(n, k);
    
+    printf("transmitting nodes:\n ");
     for (int i =0 ; i< k; i++){
         int key =randRange(n)+1;
         node * found = search(root, key);
         
         if (found !=NULL){
-            printf("node %d\n",found->id);
-           // transmitting_nodes[i] = *found;
+            found->data = 1;
+            printf("%d - ",found->id);
+            //transmitting_nodes[i] = *found;
         }
         //printf("%d - %d\n", i, key_id);
     }
@@ -186,8 +186,8 @@ int main()
    // transmitting(root, n);
     
     node * seekers = transmitting(root, n);
-   // printf("\n Preorder Traversal: ");
-   // preorder(root);
+    printf("\n Preorder Traversal: ");
+    preorder(root);
     printf("\n --end--\n ");
     return 0;
 }
