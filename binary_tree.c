@@ -83,10 +83,29 @@ void preorder(node *root)
 {
     if(root!=NULL)
     {
-        printf("id:%d - data:%d - level%d\n",root->id, root->data, root->level);
+        printf("id: %d - data: %d - level: %d\n",root->id, root->data, root->level);
         preorder(root->left);
         preorder(root->right);
     }
+    
+}
+
+/* recursive traversal of tree and
+ printing of nodesin bottom view*/
+void bottom_view(node *root)
+{
+   // int * bot_ids;
+    int i=0;
+    if(root!=NULL)
+    {
+        if ((root->level) == max_level && (root->data)==1){
+            printf("%d - ",root->id);
+            //bot_ids[i]=root->id;
+        }
+        bottom_view(root->left);
+        bottom_view(root->right);
+    }
+  //  return bot_ids;
 }
 
 
@@ -114,6 +133,14 @@ node* search(node *root, int key){
     
     return NULL;
 }
+
+/* recursive traversal of tree and
+ printing of nodes id in tree increasing order*/
+node* check(node *root){
+
+    
+    return NULL;
+}
 /* returns the factorial of int n
  we want 2^level nodes at the bottom level
  total # of nodes = sum of nodes at each level*/
@@ -123,7 +150,7 @@ int total_nodes(int n){
         total = total + pow(2, n);
         n --;
     }while(n>=0);
-  //  printf("Total number of nodes: %d.\n", total);
+    
     return total;
 }
 
@@ -144,8 +171,6 @@ node * transmitting(node * root,  int n){
     node * temp;
     node * transmitting_nodes;
     int k = randRange(n)+1;
-    
-   // int * keys = random_keys(n, k);
    
     printf("transmitting nodes:\n ");
     for (int i =0 ; i< k; i++){
@@ -155,11 +180,28 @@ node * transmitting(node * root,  int n){
         if (found !=NULL){
             found->data = 1;
             printf("%d - ",found->id);
-            //transmitting_nodes[i] = *found;
         }
     }
   
     return transmitting_nodes;
+}
+
+/*returns all nodes with level = key
+node * starting(node * root,  int bottom){
+    node * temp;
+    node * probers;
+    
+    printf("\ndata = 1 nodes:\n ");
+    for (int i =0 ; i< bottom; i++){
+        node * found = probe(root);
+        
+        if (found !=NULL){
+            //found->data = 1;
+            printf("%d - ",found->id);
+        }
+    }
+    
+    return probers;
 }
 
 /****************************** main ***************************/
@@ -187,8 +229,14 @@ int main()
    // transmitting(root, n);
     
     node * seekers = transmitting(root, bottom);
-    printf("\n Preorder Traversal: \n");
-    preorder(root);
+   // int * bottom_ids =
+    printf("\nxming ids:\n");
+    bottom_view(root);
+    
+    //printf("\n All Nodes: \n");
+    //preorder(root);
+   // printf("\n Bottom View: \n");
+    //bottom_view(root);
     printf("\n --end--\n ");
     return 0;
 }
