@@ -9,11 +9,14 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-//#include <strings.h>
+#include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 
 /** max number of nodes = 2 ^ level **/
 int max_level = 3;
+
+static int key_id=0;
 
 /** helper functions **/
 unsigned int int_to_binary(unsigned int k) {
@@ -51,10 +54,11 @@ node *create(int id)
 {
     node *temp;
     temp=(node*)malloc(sizeof(node));
-    temp->id  = int_to_binary(id-1);
+    temp->id = id-1;
+   // temp->id  = int_to_binary(id-1);
     temp->level  = level_from_id(id);
     temp->left=temp->right=NULL;
-    printf("created node with id:%d at level:%d \n", temp->id, temp->level);
+    //printf("created node with id:%d at level:%d \n", temp->id, temp->level);
     return temp;
 }
 
@@ -87,6 +91,32 @@ void preorder(node *root)
         preorder(root->right);
     }
 }
+
+
+/* recursive traversal of tree and
+ printing of nodes id in tree increasing order*/
+node* search(node *root, int key){
+    node* found = NULL;
+    
+    if(root == NULL)
+        return NULL;
+    
+    
+    if(root->id== key)
+        return root;
+    
+    found = search(root->left, key);
+    if (found)
+        return found;
+    
+    found = search(root->right, key);
+    if (found){
+        return found;
+    }
+    
+    
+    return NULL;
+}
 /* returns the factorial of int n
  we want 2^level nodes at the bottom level
  total # of nodes = sum of nodes at each level*/
@@ -100,12 +130,36 @@ int total_nodes(int n){
     return total;
 }
 
-/* random number generator between 0 and n */
-int random_int(int n){
-    srand(time(NULL));   // should only be called once
-    int r = rand() % n;      // returns a pseudo-random integer between 0 and RAND_MAX
-    printf("Random between 0 and %d: %d\n",n,r);
+int randRange(int n){
+    int limit, r;
+    limit = RAND_MAX - (RAND_MAX % n);
+    while((r = rand()) >= limit);
+    r = r % n;
     return r;
+}
+
+
+/*get a random number of nodes with random_int
+ and returns each randomly selected with random_int*/
+node * transmitting(node * root,  int n){
+    node * temp;
+    node * transmitting_nodes;
+    int k = randRange(n)+1;
+    
+   // int * keys = random_keys(n, k);
+   
+    for (int i =0 ; i< k; i++){
+        int key =randRange(n)+1;
+        node * found = search(root, key);
+        
+        if (found !=NULL){
+            printf("node %d\n",found->id);
+           // transmitting_nodes[i] = *found;
+        }
+        //printf("%d - %d\n", i, key_id);
+    }
+  
+    return transmitting_nodes;
 }
 
 /****************************** main ***************************/
@@ -114,7 +168,7 @@ int main()
     int j =1;
     int n = total_nodes(max_level);//test value with 3 levels.
     /*create root*/
-    node *root=NULL,*temp;
+    node *root=NULL,*temp, *rando;
     
     while(j <= n)
     {
@@ -128,10 +182,12 @@ int main()
         
     }
     
-    random_int(n);
+    srand(time(NULL));
+   // transmitting(root, n);
     
-    printf("\n Preorder Traversal: ");
-    preorder(root);
+    node * seekers = transmitting(root, n);
+   // printf("\n Preorder Traversal: ");
+   // preorder(root);
     printf("\n --end--\n ");
     return 0;
 }
