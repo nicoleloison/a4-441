@@ -91,21 +91,18 @@ void preorder(node *root)
 }
 
 /* recursive traversal of tree and
- printing of nodesin bottom view*/
+ printing of nodes in bottom view that are transmitting*/
 void bottom_view(node *root)
 {
-   // int * bot_ids;
     int i=0;
     if(root!=NULL)
     {
         if ((root->level) == max_level && (root->data)==1){
             printf("%d - ",root->id);
-            //bot_ids[i]=root->id;
         }
         bottom_view(root->left);
         bottom_view(root->right);
     }
-  //  return bot_ids;
 }
 
 
@@ -226,10 +223,9 @@ int main()
     }
     
     srand(time(NULL));
-   // transmitting(root, n);
+    transmitting(root, bottom);
     
-    node * seekers = transmitting(root, bottom);
-   // int * bottom_ids =
+   // node * seekers = transmitting(root, bottom);
     printf("\nxming ids:\n");
     bottom_view(root);
     
