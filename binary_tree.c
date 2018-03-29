@@ -28,23 +28,23 @@ unsigned int level_from_id(unsigned int node_id){
 /* tree structure */
 typedef struct tree
 {
-    int id, level;
+    int id, level, binary;
     int data;
     struct tree *left;
     struct tree *right;
 }node;
 
 /* node struc and helper functions */
-node *create();
-void insert(node *,node *);
-void preorder(node *);
-
 struct node
 {
-    int id, data, level;
+    int id, data, level, binary;
     struct node *left;
     struct node *right;
 };
+
+node *create();
+void insert(node *,node *);
+void preorder(node *);
 
 node *create(int id)
 {
@@ -52,7 +52,7 @@ node *create(int id)
     temp=(node*)malloc(sizeof(node));
     temp->id = id-1;
     temp->data = 0;
-   //temp->id  = int_to_binary(id-1);
+    temp->binary  = int_to_binary(id-1);
     temp->level  = level_from_id(id);
     temp->left=temp->right=NULL;
     //printf("created node with id:%d at level:%d \n", temp->id, temp->level);
@@ -94,15 +94,17 @@ void preorder(node *root)
  printing of nodes in bottom view that are transmitting*/
 void bottom_view(node *root)
 {
-    int i=0;
     if(root!=NULL)
     {
+        int i =0;
         if ((root->level) == max_level && (root->data)==1){
             printf("%d - ",root->id);
+            i++;
         }
         bottom_view(root->left);
         bottom_view(root->right);
     }
+    
 }
 
 
@@ -110,10 +112,8 @@ void bottom_view(node *root)
  printing of nodes id in tree increasing order*/
 node* search(node *root, int key){
     node* found = NULL;
-    
     if(root == NULL)
         return NULL;
-    
     
     if(root->id== key)
         return root;
@@ -123,21 +123,36 @@ node* search(node *root, int key){
         return found;
     
     found = search(root->right, key);
-    if (found){
+    if (found)
         return found;
-    }
-    
     
     return NULL;
 }
 
 /* recursive traversal of tree and
  printing of nodes id in tree increasing order*/
-node* check(node *root){
+node* search_from_level(node *root, int level){
+    node* lvl = NULL;
 
+    if(root == NULL)
+        return NULL;
+    
+    printf("Looking for nodes lvl %d at node %d \n",level,  root->id);
+    
+    if(root->level == level)
+        return root;
+    
+    lvl = search_from_level(root->left, level);
+    if (lvl)
+        return lvl;
+    
+    lvl = search_from_level(root->right, level);
+    if (lvl)
+        return lvl;
     
     return NULL;
 }
+
 /* returns the factorial of int n
  we want 2^level nodes at the bottom level
  total # of nodes = sum of nodes at each level*/
@@ -154,8 +169,6 @@ int total_nodes(int n){
 int randRange(int n){
     int limit , r;
     limit = RAND_MAX - (RAND_MAX % n);
-
-   // r = (rand() % (pow(2, max_level) + 1 ))
     while((r = rand()) >= limit);
     r = r % n;
     return r+n;
@@ -164,41 +177,64 @@ int randRange(int n){
 
 /*get a random number of nodes with random_int
  and returns each randomly selected with random_int*/
-node * transmitting(node * root,  int n){
-    node * temp;
+node * transmitting(node * root,  int n, int arr[], int k){
     node * transmitting_nodes;
-    int k = randRange(n)+1;
-   
-    printf("transmitting nodes:\n ");
-    for (int i =0 ; i< k; i++){
+    int i =0;
+    while (i < k){
         int key =randRange(n)+1;
         node * found = search(root, key);
-        
-        if (found !=NULL){
+        if (found != NULL){
+            printf("%d ", found->id);
             found->data = 1;
-            printf("%d - ",found->id);
+            arr[i]=found->binary;
+            i ++;
         }
     }
+     printf("\n");
   
     return transmitting_nodes;
 }
 
-/*returns all nodes with level = key
-node * starting(node * root,  int bottom){
-    node * temp;
-    node * probers;
+/********************************************************/
+int getAverage(int arr[], int size) {
     
-    printf("\ndata = 1 nodes:\n ");
-    for (int i =0 ; i< bottom; i++){
-        node * found = probe(root);
+    int i;
+    int avg;
+    int sum = 0;
+    
+    for (i = 0; i < size; ++i) {
+        sum += arr[i];
+    }
+    
+    avg = (int) (sum / size);
+    
+    return avg;
+}
+
+void post_order(node * root, int arr[], int size)
+{
+    if (root==NULL)
+        return;
+    
+    for (int i = 0; i < size; ++i) {
         
-        if (found !=NULL){
-            //found->data = 1;
-            printf("%d - ",found->id);
+        if (root->binary == arr[i]){
+            node * temp = search_from_level(root , (root->level)-1);
+            if (temp!=NULL){
+                // printf("temp id %d \n", temp-> id);
+            }
+          
+            //printf("parent %d with %d\n", temp->id, temp->level);
         }
     }
     
-    return probers;
+    //if (root->data == 1)
+       // printf("parent: %d ", root->binary);
+
+    
+    post_order(root->left, arr, size);
+    post_order(root->right, arr, size);//printPostorder(root->right);
+    
 }
 
 /****************************** main ***************************/
@@ -223,16 +259,29 @@ int main()
     }
     
     srand(time(NULL));
-    transmitting(root, bottom);
-    
-   // node * seekers = transmitting(root, bottom);
-    printf("\nxming ids:\n");
+    int k = (int)(rand()) %  (int)(pow(2, max_level)+1);
+   
+    while(k == 0){
+        /*in case we end up with no transmitting nodes*/
+        k = (int)(rand()) %  (int)(pow(2, max_level)+1);
+    }
+    int t[k] ;
+    for (int i = 0; i <k; ++i) {
+        t[i]=0;
+    }
+    int l = sizeof(t)/sizeof(int);
+    transmitting(root, bottom, t ,k);
+    t[l]=0;
+  
+    //printf("Xming ids:\n");
     bottom_view(root);
-    
+    printf(" \n");
+    post_order(root, t ,k);
     //printf("\n All Nodes: \n");
     //preorder(root);
    // printf("\n Bottom View: \n");
     //bottom_view(root);
+    t[0] = 0;
     printf("\n --end--\n ");
     return 0;
 }
