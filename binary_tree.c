@@ -129,28 +129,63 @@ node* search(node *root, int key){
     return NULL;
 }
 
-/* recursive traversal of tree and
- printing of nodes id in tree increasing order*/
-node* search_from_level(node *root, int level){
-    node* lvl = NULL;
-
+node * get_parent_node(node * root, node * child){
+    node * parent = NULL;
+    
     if(root == NULL)
         return NULL;
     
-    printf("Looking for nodes lvl %d at node %d \n",level,  root->id);
+    printf("Looking from %d at node %d \n", root->id, child->id);
     
-    if(root->level == level)
-        return root;
+    int parity = child->id % 2;
+    int parentID;
     
-    lvl = search_from_level(root->left, level);
-    if (lvl)
-        return lvl;
+    if (parity !=0){
+        parentID = child->id -1;
+        printf("parent ID: %d \n",parentID);
+        parent = search(root, parentID);
+        if (parent)
+            return parent;
+        
+    }
     
-    lvl = search_from_level(root->right, level);
-    if (lvl)
-        return lvl;
+    else{
+        parentID = child->id -2;
+        printf("parent ID: %d \n",parentID);
+        parent = search(root, parentID);
+        if (parent)
+            return parent;
+    }
     
     return NULL;
+}
+void probe(node * root, node * child,int arr[], int size)
+{
+    node * temp = NULL;
+    if (root==NULL)
+        return;
+    
+    temp = root;
+    
+    for (int i = 0; i < size; ++i) {
+        
+        if (temp->binary == arr[i]){
+            temp = ;
+            if (temp!=NULL){
+                // printf("temp id %d \n", temp-> id);
+            }
+            
+            //printf("parent %d with %d\n", temp->id, temp->level);
+        }
+    }
+    
+    //if (root->data == 1)
+    // printf("parent: %d ", root->binary);
+    
+    
+    post_order(root->left, arr, size);
+    post_order(root->right, arr, size);//printPostorder(root->right);
+    
 }
 
 /* returns the factorial of int n
@@ -210,33 +245,6 @@ int getAverage(int arr[], int size) {
     
     return avg;
 }
-
-void post_order(node * root, int arr[], int size)
-{
-    if (root==NULL)
-        return;
-    
-    for (int i = 0; i < size; ++i) {
-        
-        if (root->binary == arr[i]){
-            node * temp = search_from_level(root , (root->level)-1);
-            if (temp!=NULL){
-                // printf("temp id %d \n", temp-> id);
-            }
-          
-            //printf("parent %d with %d\n", temp->id, temp->level);
-        }
-    }
-    
-    //if (root->data == 1)
-       // printf("parent: %d ", root->binary);
-
-    
-    post_order(root->left, arr, size);
-    post_order(root->right, arr, size);//printPostorder(root->right);
-    
-}
-
 /****************************** main ***************************/
 int main()
 {
@@ -276,7 +284,11 @@ int main()
     //printf("Xming ids:\n");
     bottom_view(root);
     printf(" \n");
-    post_order(root, t ,k);
+    
+    node * test = search(root, 8);
+    node * node_six = get_parent_node(root, test);
+    printf("should be 6:%d, 0: %d, 2:%d\n", node_six->id, node_six->data, node_six->level);
+
     //printf("\n All Nodes: \n");
     //preorder(root);
    // printf("\n Bottom View: \n");
