@@ -115,8 +115,11 @@ node* search(node *root, int key){
     if(root == NULL)
         return NULL;
     
-    if(root->id== key)
-        return root;
+    if(root->id== key){
+      //  printf("in search found id: %d\n", root->id);
+       return root;
+    }
+    
     
     found = search(root->left, key);
     if (found)
@@ -132,17 +135,15 @@ node* search(node *root, int key){
 node * get_parent_node(node * root, node * child){
     node * parent = NULL;
     
-    if(root == NULL)
+    if(root==NULL || child == NULL)
         return NULL;
-    
-    printf("Looking from %d at node %d \n", root->id, child->id);
     
     int parity = child->id % 2;
     int parentID;
     
     if (parity !=0){
         parentID = child->id -1;
-        printf("parent ID: %d \n",parentID);
+    //    printf("parent ID: %d \n",parentID);
         parent = search(root, parentID);
         if (parent)
             return parent;
@@ -151,7 +152,7 @@ node * get_parent_node(node * root, node * child){
     
     else{
         parentID = child->id -2;
-        printf("parent ID: %d \n",parentID);
+       // printf("parent ID: %d \n",parentID);
         parent = search(root, parentID);
         if (parent)
             return parent;
@@ -159,32 +160,31 @@ node * get_parent_node(node * root, node * child){
     
     return NULL;
 }
-void probe(node * root, node * child,int arr[], int size)
+
+/*arr[] array of ids of transmitting nodes, size the number of transmitting nodes
+ root the root of tree, child the node we want the parent of*/
+void probe(node * root, node * child, int arr[], int size)
 {
-    node * temp = NULL;
-    if (root==NULL)
+   
+    node * parent = NULL;
+    
+    if (root==NULL || child == NULL)
         return;
     
-    temp = root;
+   // printf("In PROBE: root %d, temp: %d , child: %d\n",root->id,temp->id, child->id);
     
     for (int i = 0; i < size; ++i) {
-        
-        if (temp->binary == arr[i]){
-            temp = ;
-            if (temp!=NULL){
-                // printf("temp id %d \n", temp-> id);
+        node * temp = search(root, arr[i]);
+        //printf("In PROBE: i: %d, arr: %d , temp: %d\n",i,arr[i], temp->id);
+        if (temp->id == arr[i]){
+           // printf("Node %d in Xming \n", temp->id);
+            parent = get_parent_node(root, temp);
+            if (parent){
+                parent->data = 1;
+                printf("%d parent of %d is now : %d\n",parent->id, temp-> id, parent->data);
             }
-            
-            //printf("parent %d with %d\n", temp->id, temp->level);
         }
     }
-    
-    //if (root->data == 1)
-    // printf("parent: %d ", root->binary);
-    
-    
-    post_order(root->left, arr, size);
-    post_order(root->right, arr, size);//printPostorder(root->right);
     
 }
 
@@ -221,7 +221,7 @@ node * transmitting(node * root,  int n, int arr[], int k){
         if (found != NULL){
             printf("%d ", found->id);
             found->data = 1;
-            arr[i]=found->binary;
+            arr[i]=found->id;
             i ++;
         }
     }
@@ -265,13 +265,14 @@ int main()
         j++;
         
     }
-    
+    /*k = the random number of node transmitting*/
     srand(time(NULL));
     int k = (int)(rand()) %  (int)(pow(2, max_level)+1);
    
     while(k == 0){
         /*in case we end up with no transmitting nodes*/
         k = (int)(rand()) %  (int)(pow(2, max_level)+1);
+        /*k = random id of nodes transmiting*/
     }
     int t[k] ;
     for (int i = 0; i <k; ++i) {
@@ -282,13 +283,23 @@ int main()
     t[l]=0;
   
     //printf("Xming ids:\n");
-    bottom_view(root);
-    printf(" \n");
+   // bottom_view(root);
+   // printf(" \n");
     
-    node * test = search(root, 8);
-    node * node_six = get_parent_node(root, test);
-    printf("should be 6:%d, 0: %d, 2:%d\n", node_six->id, node_six->data, node_six->level);
-
+    for (int i = 0; i <k; ++i) {
+        node * test = search (root, t[i]);
+        if (test){
+           // printf("child:%d, root:%d\n", test->id, root->id );
+            probe(root, test, t, k);
+        }
+        
+    }
+    /*
+    node * node_six = search(root, 6);
+    node * node_four = get_parent_node(root, node_six);
+    printf("should be 4:%d, 0: %d, 2:%d\n", node_four->id, node_four->data, node_four->level);
+     */
+    
     //printf("\n All Nodes: \n");
     //preorder(root);
    // printf("\n Bottom View: \n");
