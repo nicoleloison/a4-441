@@ -142,7 +142,7 @@ node * get_parent_node(node * root, node * child){
     int parentID;
     
     if (parity !=0){
-        parentID = child->id -1;
+        parentID = child->id/2;
     //    printf("parent ID: %d \n",parentID);
         parent = search(root, parentID);
         if (parent)
@@ -151,7 +151,7 @@ node * get_parent_node(node * root, node * child){
     }
     
     else{
-        parentID = child->id -2;
+        parentID = child->id/2 -1;
        // printf("parent ID: %d \n",parentID);
         parent = search(root, parentID);
         if (parent)
@@ -179,9 +179,12 @@ void probe(node * root, node * child, int arr[], int size)
         if (temp->id == arr[i]){
            // printf("Node %d in Xming \n", temp->id);
             parent = get_parent_node(root, temp);
-            if (parent){
+            if (parent && parent->data == 0){
                 parent->data = 1;
                 printf("%d parent of %d is now : %d\n",parent->id, temp-> id, parent->data);
+            }
+            else if (parent && parent->data != 0){
+                printf("Parent %d is already taken : COLLISION ?\n",parent->id);
             }
         }
     }
