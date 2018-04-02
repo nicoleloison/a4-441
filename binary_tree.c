@@ -161,33 +161,56 @@ node * get_parent_node(node * root, node * child){
     return NULL;
 }
 
+/*returns the number of tries from original Xming node
+to get to root of three the node */
+int tries (int xming, int tries){
+    tries ++;
+    return tries;
+}
+
+
 /*arr[] array of ids of transmitting nodes, size the number of transmitting nodes
  root the root of tree, child the node we want the parent of*/
-void probe(node * root, node * child, int arr[], int size)
+int probe(node * root, node * child, int arr[], int size)
 {
-   
     node * parent = NULL;
-    
     if (root==NULL || child == NULL)
-        return;
+        return -1;
     
-   // printf("In PROBE: root %d, temp: %d , child: %d\n",root->id,temp->id, child->id);
+    int attempt =0;
     
     for (int i = 0; i < size; ++i) {
+      
         node * temp = search(root, arr[i]);
-        //printf("In PROBE: i: %d, arr: %d , temp: %d\n",i,arr[i], temp->id);
+       // printf("In PROBE: arr: %d , temp: %d\n",arr[i], temp->id);
         if (temp->id == arr[i]){
-           // printf("Node %d in Xming \n", temp->id);
+            
             parent = get_parent_node(root, temp);
-            if (parent && parent->data == 0){
-                parent->data = 1;
-                printf("%d parent of %d is now : %d\n",parent->id, temp-> id, parent->data);
+            if (parent->id == 0){
+                printf("Got to root from %d\n" ,temp-> id);
+                return attempt;
             }
+            
+            else if (parent && parent->data == 0){
+                
+                parent->data = 1 ;
+                arr[i]=parent->id;
+                printf("%d:%d -> %d:%d\n",temp-> id,temp->data, parent->id, parent->data);
+                attempt=1;
+                
+                probe(root, parent, arr, size);
+            }
+            
             else if (parent && parent->data != 0){
-                printf("Parent %d is already taken : COLLISION ?\n",parent->id);
+                attempt++;
+                parent->data = 0;
+                printf("%d parent of %d is already taken. \n",parent->id, temp->id);
+                probe(root, temp, arr, size);
+                
             }
         }
     }
+    return attempt;
     
 }
 
@@ -288,15 +311,22 @@ int main()
     //printf("Xming ids:\n");
    // bottom_view(root);
    // printf(" \n");
-    
+    int attempt=0;
     for (int i = 0; i <k; ++i) {
         node * test = search (root, t[i]);
         if (test){
            // printf("child:%d, root:%d\n", test->id, root->id );
-            probe(root, test, t, k);
+            int at = probe(root, test, t, k);
+            if (attempt< at){
+                attempt = at;
+            }
+            printf("attempts: %d\n", attempt);
         }
         
     }
+   
+    
+    
     /*
     node * node_six = search(root, 6);
     node * node_four = get_parent_node(root, node_six);
