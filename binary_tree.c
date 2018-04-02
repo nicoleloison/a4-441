@@ -13,7 +13,7 @@
 #include <errno.h>
 
 /** max number of nodes = 2 ^ level **/
-int max_level = 3;
+int max_level = 10;
 
 /** helper functions **/
 unsigned int int_to_binary(unsigned int k) {
@@ -187,7 +187,7 @@ int probe(node * root, node * child, int arr[], int size)
             
             parent = get_parent_node(root, temp);
             if (parent->id == 0){
-                printf("Got to root from %d\n" ,temp-> id);
+                //printf("Got to root from %d\n" ,temp-> id);
                 return attempt;
             }
             
@@ -196,7 +196,7 @@ int probe(node * root, node * child, int arr[], int size)
                 parent->data = 1 ;
                 arr[i]=parent->id;
                 printf("%d:%d -> %d:%d\n",temp-> id,temp->data, parent->id, parent->data);
-                attempt=1;
+                //attempt++;
                 
                 probe(root, parent, arr, size);
             }
@@ -204,7 +204,8 @@ int probe(node * root, node * child, int arr[], int size)
             else if (parent && parent->data != 0){
                 attempt++;
                 parent->data = 0;
-                printf("%d parent of %d is already taken. \n",parent->id, temp->id);
+                printf("Collision on %d at level %d \n",parent->id,parent->level);
+                
                 probe(root, temp, arr, size);
                 
             }
@@ -276,7 +277,8 @@ int main()
 {
     int j =1;
     int n = total_nodes(max_level);//test value with 3 levels.
-    int bottom = (int) pow(2, max_level);
+    int bottom = (int) pow(2, max_level);//number of nodes at bottom level
+   
     /*create root*/
     node *root=NULL,*temp, *rando;
     
@@ -307,36 +309,25 @@ int main()
     int l = sizeof(t)/sizeof(int);
     transmitting(root, bottom, t ,k);
     t[l]=0;
-  
-    //printf("Xming ids:\n");
-   // bottom_view(root);
-   // printf(" \n");
+
+    /*calclulate the number of attempts it takes for probes to reach the root without collisions*/
     int attempt=0;
+    
     for (int i = 0; i <k; ++i) {
         node * test = search (root, t[i]);
         if (test){
-           // printf("child:%d, root:%d\n", test->id, root->id );
             int at = probe(root, test, t, k);
-            if (attempt< at){
-                attempt = at;
-            }
-            printf("attempts: %d\n", attempt);
+            attempt = attempt + at;
         }
-        
     }
+  
+    //success rate = attemps/ number of xming nodes
+    double success = (double) attempt * 100/ (double) l;
+    
+    printf("\nSuccess rate is %f percent\n", success);
+    printf("Number of Collisions: %d \n", attempt);
+    printf("Number of transmitting nodes: %d \n", l);
    
-    
-    
-    /*
-    node * node_six = search(root, 6);
-    node * node_four = get_parent_node(root, node_six);
-    printf("should be 4:%d, 0: %d, 2:%d\n", node_four->id, node_four->data, node_four->level);
-     */
-    
-    //printf("\n All Nodes: \n");
-    //preorder(root);
-   // printf("\n Bottom View: \n");
-    //bottom_view(root);
     t[0] = 0;
     printf("\n --end--\n ");
     return 0;
