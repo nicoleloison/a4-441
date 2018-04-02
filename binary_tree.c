@@ -46,6 +46,7 @@ node *create();
 void insert(node *,node *);
 void preorder(node *);
 
+/*returns created new node from id # */
 node *create(int id)
 {
     node *temp;
@@ -59,6 +60,7 @@ node *create(int id)
     return temp;
 }
 
+/*insert a new node temp in the tree at root*/
 void insert(node *root,node *temp)
 {
     if(temp->id<root->id)
@@ -132,6 +134,7 @@ node* search(node *root, int key){
     return NULL;
 }
 
+/*returns parent of node from child and root*/
 node * get_parent_node(node * root, node * child){
     node * parent = NULL;
     
@@ -195,7 +198,7 @@ int probe(node * root, node * child, int arr[], int size)
                 
                 parent->data = 1 ;
                 arr[i]=parent->id;
-                printf("%d:%d -> %d:%d\n",temp-> id,temp->data, parent->id, parent->data);
+              //  printf("%d:%d -> %d:%d\n",temp-> id,temp->data, parent->id, parent->data);
                 //attempt++;
                 
                 probe(root, parent, arr, size);
@@ -227,6 +230,7 @@ int total_nodes(int n){
     return total;
 }
 
+/*return a random int between 0 and n*/
 int randRange(int n){
     int limit , r;
     limit = RAND_MAX - (RAND_MAX % n);
@@ -255,7 +259,9 @@ node * transmitting(node * root,  int n, int arr[], int k){
   
     return transmitting_nodes;
 }
-/****************************** main ***************************/
+
+/********************************************* main ********************************************/
+
 int main()
 {
     int j =1;
@@ -285,13 +291,11 @@ int main()
         k = (int)(rand()) %  (int)(pow(2, max_level)+1);
         /*k = random id of nodes transmiting*/
     }
+    
+    /*stores the xming nodes in t[] */
     int t[k] ;
-    for (int i = 0; i <k; ++i) {
-        t[i]=0;
-    }
-    int l = sizeof(t)/sizeof(int);
+    int xming = sizeof(t)/sizeof(int);
     transmitting(root, bottom, t ,k);
-    t[l]=0;
 
     /*calclulate the number of attempts it takes for probes to reach the root without collisions*/
     int collisions=0;
@@ -303,16 +307,29 @@ int main()
             collisions = collisions + at;
         }
     }
-  
-    //success rate = attemps/ number of xming nodes
-    int attempt = l + collisions;
-    double success = (double) l * 100/ (double) attempt;
     
-    printf("\nNumber of Transmitting nodes: %d \n", l);
-    printf("Number of Attempts: %d \n", attempt);
-    printf("Number of Collisions: %d \n", collisions);
-    printf("Success rate is %f percent\n", success);
+    
+    //TODO : 100 tries of that ^
+    //get probing from a specific level.
+    
   
+    //success rate = number of xming nodes /
+    int successfull = xming - collisions;
+    int attempt = xming + collisions;
+    double success = (double) xming * 100/ (double) attempt;
+    double avg = (double) attempt / (double) xming;
+    double direct_probes = (double) successfull * 100/ (double) xming;
+    
+    printf("\nTransmitting frames:\t");
+   // printf("Number of Attempts: %d \n", attempt);
+    printf("Collisions:\t");
+    printf("Avg number of tries per frame:\t");
+   // printf("Directly Succesfull probes rate is %f percent\n", direct_probes);
+    printf("Success rate:\n");
+    printf("\t %d\t\t",xming);
+    printf(" %d\t\t\t",collisions);
+    printf(" %f\t\t",avg);
+    printf(" %f\n",success);
    
     t[0] = 0;
     printf("\n --end--\n ");
