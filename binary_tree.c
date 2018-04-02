@@ -177,7 +177,7 @@ int probe(node * root, node * child, int arr[], int size)
     if (root==NULL || child == NULL)
         return -1;
     
-    int attempt =0;
+    int collisions =0;
     
     for (int i = 0; i < size; ++i) {
       
@@ -188,7 +188,7 @@ int probe(node * root, node * child, int arr[], int size)
             parent = get_parent_node(root, temp);
             if (parent->id == 0){
                 //printf("Got to root from %d\n" ,temp-> id);
-                return attempt;
+                return collisions;
             }
             
             else if (parent && parent->data == 0){
@@ -202,16 +202,15 @@ int probe(node * root, node * child, int arr[], int size)
             }
             
             else if (parent && parent->data != 0){
-                attempt++;
+                collisions++;
                 parent->data = 0;
                 printf("Collision on %d at level %d \n",parent->id,parent->level);
-                
                 probe(root, temp, arr, size);
                 
             }
         }
     }
-    return attempt;
+    return collisions;
     
 }
 
@@ -256,22 +255,6 @@ node * transmitting(node * root,  int n, int arr[], int k){
   
     return transmitting_nodes;
 }
-
-/********************************************************/
-int getAverage(int arr[], int size) {
-    
-    int i;
-    int avg;
-    int sum = 0;
-    
-    for (i = 0; i < size; ++i) {
-        sum += arr[i];
-    }
-    
-    avg = (int) (sum / size);
-    
-    return avg;
-}
 /****************************** main ***************************/
 int main()
 {
@@ -311,22 +294,25 @@ int main()
     t[l]=0;
 
     /*calclulate the number of attempts it takes for probes to reach the root without collisions*/
-    int attempt=0;
+    int collisions=0;
     
     for (int i = 0; i <k; ++i) {
         node * test = search (root, t[i]);
         if (test){
             int at = probe(root, test, t, k);
-            attempt = attempt + at;
+            collisions = collisions + at;
         }
     }
   
     //success rate = attemps/ number of xming nodes
-    double success = (double) attempt * 100/ (double) l;
+    int attempt = l + collisions;
+    double success = (double) l * 100/ (double) attempt;
     
-    printf("\nSuccess rate is %f percent\n", success);
-    printf("Number of Collisions: %d \n", attempt);
-    printf("Number of transmitting nodes: %d \n", l);
+    printf("\nNumber of Transmitting nodes: %d \n", l);
+    printf("Number of Attempts: %d \n", attempt);
+    printf("Number of Collisions: %d \n", collisions);
+    printf("Success rate is %f percent\n", success);
+  
    
     t[0] = 0;
     printf("\n --end--\n ");
