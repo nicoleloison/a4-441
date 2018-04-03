@@ -300,16 +300,16 @@ int main(int argc, char* argv[])
     }
     
     /*for statistics*/
-    int sum_successfull=0;
-    int sum_attempt = 0;
-    double sum_avg =0.0;
+    double successfull=0.0;
+    double attempt = 0.0;
+    double avg =0.0;
     double direct_probes = 0.0;
-    double sum_success =0.0;
+    double success =0.0;
+    double totxming =0.0;
+    double col=0.0;
    
     int count =0;
     do{
-        printf("\nCOUNT:%d SCENARIO: %d\n",count, scenario );
-        
         /*ready = the random number of node transmitting*/
         int ready = (int)(rand()) %  (int)(pow(2, max_level)+1);
         
@@ -335,42 +335,34 @@ int main(int argc, char* argv[])
             }
         }
         
-        int successfull = xming - collisions;
-        int attempt = xming + collisions;
-        double avg = (double) attempt / (double) xming;
-        double direct_probes = (double) successfull * 100/ (double) xming;
-        double success = (double) xming * 100/ (double) attempt;
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        totxming += (double)xming;
+        successfull += (double) xming - collisions;
+        attempt += (double) xming + collisions;
+        avg += (double) attempt / (double) xming;
+        direct_probes += (double)(xming - collisions )* 100/ (double) xming;
+        success += (double) xming * 100/( (double) xming + collisions);
+        col += (double) collisions;
         
         t[0] = 0;
-        
         count ++;
     }while(count < scenario);
     
     
+    successfull = successfull / scenario;
+    attempt = attempt /scenario;
+    avg = avg /scenario;
+    direct_probes = direct_probes /scenario;
+    success = success /scenario;
+    totxming = totxming /scenario;
+    col = col /scenario;
     
-    
-   /*
-    printf("\nReady stations:\t\t");
+    printf("\nAvg number of ready stations:\t%f\n", totxming);
    
-    printf("Collisions:\t");
-    printf("Avg rounds per stations:\t");
-    printf("Average case performance:\n");
-    printf("\t %d\t\t",xming);
-    printf("  %d\t\t\t",collisions);
-    printf(" %f\t\t",avg);
-    printf(" %f\n",success);
-
-    printf("Number of Attempts: %d \n", attempt);
-    printf("Directly Succesfull probes rate is %f percent\n", direct_probes);*/
+    printf("Avg collisions per test:\t%f\n", col);
+    printf("Avg rounds per stations:\t%f\n", avg);
+    printf("Avg number of rounds per test:\t%f\n", attempt);
+    printf("Directly Succesfull probes rate:%f percent\n", direct_probes);
+    printf("Average test performance:\t%f percent\n", success);
 
     printf("\n --end--\n ");
     return 0;
