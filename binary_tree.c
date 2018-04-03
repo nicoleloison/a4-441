@@ -13,9 +13,9 @@
 #include <errno.h>
 
 /** max number of nodes = 2 ^ level TO REMOVE AFTER TEST**/
-int max_level = 3;
-int start_level = 2;
-int scenario = 3;
+int max_level = 10;
+int start_level = 10;
+int scenario = 10;
 
 /** helper functions **/
 unsigned int int_to_binary(unsigned int k) {
@@ -102,7 +102,6 @@ void bottom_view(node *root)
     {
         int i =0;
         if ((root->level) == max_level && (root->data)==1){
-            printf("%d - ",root->id);
             i++;
         }
         bottom_view(root->left);
@@ -176,7 +175,7 @@ int tries (int xming, int tries){
 
 /*arr[] array of ids of transmitting nodes, size the number of transmitting nodes
  root the root of tree, child the node we want the parent of*/
-int probe(node * root, node * child, int arr[], int size)
+int probe(node * root, node * child, int arr[], int size, int start)
 {
     node * parent = NULL;
     if (root==NULL || child == NULL)
@@ -203,14 +202,14 @@ int probe(node * root, node * child, int arr[], int size)
               //  printf("%d:%d -> %d:%d\n",temp-> id,temp->data, parent->id, parent->data);
                 //attempt++;
                 
-                probe(root, parent, arr, size);
+                probe(root, parent, arr, size, start);
             }
             
             else if (parent && parent->data != 0){
                 collisions++;
                 parent->data = 0;
-                printf("Collision on %d at level %d \n",parent->id,parent->level);
-                probe(root, temp, arr, size);
+                //printf("Collision on %d at level %d \n",parent->id,parent->level);
+                probe(root, temp, arr, size,start);
                 
             }
         }
@@ -251,14 +250,11 @@ node * transmitting(node * root,  int n, int arr[], int k){
         int key =randRange(n)+1;
         node * found = search(root, key);
         if (found != NULL){
-            printf("%d ", found->id);
             found->data = 1;
             arr[i]=found->id;
             i ++;
         }
     }
-     printf("\n");
-  
     return transmitting_nodes;
 }
 
@@ -283,6 +279,9 @@ int main(int argc, char* argv[])
     int n = total_nodes(max_level);//number of nodes total in tree (virtual and real)
     int bottom = (int) pow(2, max_level);//number of real nodes (bottom level)
    
+    printf("\nNumber of real nodes:\t Number of Scenarios:\t Starting Level:\t\n");
+    printf("\t%d \t\t\t %d \t\t\t %d \t\n",bottom,scenario,start_level );
+    
     /*create tree and fill it*/
     node *root=NULL,*temp;
     srand(time(NULL));
@@ -330,7 +329,7 @@ int main(int argc, char* argv[])
         for (int i = 0; i <ready; ++i) {
             node * test = search (root, t[i]);
             if (test){
-                int at = probe(root, test, t, ready);
+                int at = probe(root, test, t, ready, start_level);
                 collisions = collisions + at;
             }
         }
@@ -354,7 +353,7 @@ int main(int argc, char* argv[])
     direct_probes = direct_probes /scenario;
     success = success /scenario;
     totxming = totxming /scenario;
-    col = col /scenario;
+    col = col/scenario;
     
     printf("\nAvg number of ready stations:\t%f\n", totxming);
    
