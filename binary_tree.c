@@ -12,8 +12,10 @@
 #include <assert.h>
 #include <errno.h>
 
-/** max number of nodes = 2 ^ level **/
-int max_level = 10;
+/** max number of nodes = 2 ^ level TO REMOVE AFTER TEST**/
+int max_level = 3;
+int start_level = 2;
+int scenario = 3;
 
 /** helper functions **/
 unsigned int int_to_binary(unsigned int k) {
@@ -262,14 +264,28 @@ node * transmitting(node * root,  int n, int arr[], int k){
 
 /********************************************* main ********************************************/
 
-int main()
+int main(int argc, char* argv[])
 {
+    /*TO REMOVE AFTER TESTING
+     reading arguments from user: ./binary maxlevel tries (start) )
+    if (argc!=4)
+    {
+        printf("Please enter 3 arguments: ./binary max_level, start_level, scenario\n");
+        return -1;
+    }
+    int max_level= (int)argv[1];
+    int start_level = (int)argv[2];
+    int scenario = (int)argv[3];
+    printf("\n\nmax: %d, tries: %d, start:%d\n\n", max_level, start_level, scenario);
+    */
+    
     int j =1;
-    int n = total_nodes(max_level);//test value with 3 levels.
-    int bottom = (int) pow(2, max_level);//number of nodes at bottom level
+    int n = total_nodes(max_level);//number of nodes total in tree (virtual and real)
+    int bottom = (int) pow(2, max_level);//number of real nodes (bottom level)
    
-    /*create root*/
-    node *root=NULL,*temp, *rando;
+    /*create tree and fill it*/
+    node *root=NULL,*temp;
+    srand(time(NULL));
     
     while(j <= n)
     {
@@ -282,56 +298,80 @@ int main()
         j++;
         
     }
-    /*k = the random number of node transmitting*/
-    srand(time(NULL));
-    int k = (int)(rand()) %  (int)(pow(2, max_level)+1);
+    
+    /*for statistics*/
+    int sum_successfull=0;
+    int sum_attempt = 0;
+    double sum_avg =0.0;
+    double direct_probes = 0.0;
+    double sum_success =0.0;
    
-    while(k == 0){
-        /*in case we end up with no transmitting nodes*/
-        k = (int)(rand()) %  (int)(pow(2, max_level)+1);
-        /*k = random id of nodes transmiting*/
-    }
-    
-    /*stores the xming nodes in t[] */
-    int t[k] ;
-    int xming = sizeof(t)/sizeof(int);
-    transmitting(root, bottom, t ,k);
-
-    /*calclulate the number of attempts it takes for probes to reach the root without collisions*/
-    int collisions=0;
-    
-    for (int i = 0; i <k; ++i) {
-        node * test = search (root, t[i]);
-        if (test){
-            int at = probe(root, test, t, k);
-            collisions = collisions + at;
+    int count =0;
+    do{
+        printf("\nCOUNT:%d SCENARIO: %d\n",count, scenario );
+        
+        /*ready = the random number of node transmitting*/
+        int ready = (int)(rand()) %  (int)(pow(2, max_level)+1);
+        
+        while(ready == 0){
+            /*in case we end up with no transmitting nodes*/
+            ready = (int)(rand()) %  (int)(pow(2, max_level)+1);
+            /*k = random id of nodes transmiting*/
         }
-    }
+        
+        /*stores the xming nodes in t[]*/
+        int t[ready] ;
+        int xming = sizeof(t)/sizeof(int);
+        transmitting(root, bottom, t ,ready);
+        
+        /* calclulate the number of attempts it takes for probes to reach
+         the root including collisions */
+        int collisions=0;
+        for (int i = 0; i <ready; ++i) {
+            node * test = search (root, t[i]);
+            if (test){
+                int at = probe(root, test, t, ready);
+                collisions = collisions + at;
+            }
+        }
+        
+        int successfull = xming - collisions;
+        int attempt = xming + collisions;
+        double avg = (double) attempt / (double) xming;
+        double direct_probes = (double) successfull * 100/ (double) xming;
+        double success = (double) xming * 100/ (double) attempt;
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        t[0] = 0;
+        
+        count ++;
+    }while(count < scenario);
     
     
-    //TODO : 100 tries of that ^
-    //get probing from a specific level.
     
-  
-    //success rate = number of xming nodes /
-    int successfull = xming - collisions;
-    int attempt = xming + collisions;
-    double success = (double) xming * 100/ (double) attempt;
-    double avg = (double) attempt / (double) xming;
-    double direct_probes = (double) successfull * 100/ (double) xming;
     
-    printf("\nTransmitting frames:\t");
-   // printf("Number of Attempts: %d \n", attempt);
+   /*
+    printf("\nReady stations:\t\t");
+   
     printf("Collisions:\t");
-    printf("Avg number of tries per frame:\t");
-   // printf("Directly Succesfull probes rate is %f percent\n", direct_probes);
-    printf("Success rate:\n");
+    printf("Avg rounds per stations:\t");
+    printf("Average case performance:\n");
     printf("\t %d\t\t",xming);
-    printf(" %d\t\t\t",collisions);
+    printf("  %d\t\t\t",collisions);
     printf(" %f\t\t",avg);
     printf(" %f\n",success);
-   
-    t[0] = 0;
+
+    printf("Number of Attempts: %d \n", attempt);
+    printf("Directly Succesfull probes rate is %f percent\n", direct_probes);*/
+
     printf("\n --end--\n ");
     return 0;
 }
