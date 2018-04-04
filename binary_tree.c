@@ -12,10 +12,11 @@
 #include <assert.h>
 #include <errno.h>
 
-/** max number of nodes = 2 ^ level TO REMOVE AFTER TEST**/
+/*FOR EASY TESTING
+ max number of nodes = 2 ^ level
 int max_level = 10;
-int start_level = 10;
-int scenario = 10;
+int start_level = 4;
+int scenario = 1000;*/
 
 /** helper functions **/
 unsigned int int_to_binary(unsigned int k) {
@@ -96,7 +97,7 @@ void preorder(node *root)
 
 /* recursive traversal of tree and
  printing of nodes in bottom view that are transmitting*/
-void bottom_view(node *root)
+void bottom_view(node *root, int max_level)
 {
     if(root!=NULL)
     {
@@ -104,8 +105,8 @@ void bottom_view(node *root)
         if ((root->level) == max_level && (root->data)==1){
             i++;
         }
-        bottom_view(root->left);
-        bottom_view(root->right);
+        bottom_view(root->left, max_level);
+        bottom_view(root->right, max_level);
     }
     
 }
@@ -175,20 +176,17 @@ int tries (int xming, int tries){
 
 /*arr[] array of ids of transmitting nodes, size the number of transmitting nodes
  root the root of tree, child the node we want the parent of*/
-int probe(node * root, node * child, int arr[], int size, int start)
+int probe(node * root, node * child, int arr[], int size, int start, int collisions)
 {
     node * parent = NULL;
     if (root==NULL || child == NULL)
         return -1;
-    
-    int collisions =0;
     
     for (int i = 0; i < size; ++i) {
       
         node * temp = search(root, arr[i]);
        // printf("In PROBE: arr: %d , temp: %d\n",arr[i], temp->id);
         if (temp->id == arr[i]){
-            
             parent = get_parent_node(root, temp);
             if (parent->id == 0){
                 //printf("Got to root from %d\n" ,temp-> id);
@@ -196,21 +194,16 @@ int probe(node * root, node * child, int arr[], int size, int start)
             }
             
             else if (parent && parent->data == 0){
-                
                 parent->data = 1 ;
                 arr[i]=parent->id;
-              //  printf("%d:%d -> %d:%d\n",temp-> id,temp->data, parent->id, parent->data);
-                //attempt++;
-                
-                probe(root, parent, arr, size, start);
+                probe(root, parent, arr, size, start, collisions);
             }
             
             else if (parent && parent->data != 0){
-                collisions++;
+                ++collisions;
                 parent->data = 0;
-                //printf("Collision on %d at level %d \n",parent->id,parent->level);
-                probe(root, temp, arr, size,start);
-                
+               // printf("col: %d ",collisions);
+                probe(root, temp, arr, size,start, collisions);
             }
         }
     }
@@ -232,7 +225,7 @@ int total_nodes(int n){
 }
 
 /*return a random int between 0 and n*/
-int randRange(int n){
+int random_generator(int n){
     int limit , r;
     limit = RAND_MAX - (RAND_MAX % n);
     while((r = rand()) >= limit);
@@ -247,11 +240,12 @@ node * transmitting(node * root,  int n, int arr[], int k){
     node * transmitting_nodes;
     int i =0;
     while (i < k){
-        int key =randRange(n)+1;
+        int key =random_generator(n)+1;
         node * found = search(root, key);
         if (found != NULL){
             found->data = 1;
             arr[i]=found->id;
+            //printf("%d - ", arr[i]);
             i ++;
         }
     }
@@ -262,23 +256,29 @@ node * transmitting(node * root,  int n, int arr[], int k){
 
 int main(int argc, char* argv[])
 {
-    /*TO REMOVE AFTER TESTING
-     reading arguments from user: ./binary maxlevel tries (start) )
+    
+    /* reading arguments from user: ./binary maxlevel tries (start) )*/
     if (argc!=4)
     {
-        printf("Please enter 3 arguments: ./binary max_level, start_level, scenario\n");
+        printf("Please enter 3 arguments: ./binary max_level(1->10) start_level(0->10) scenario(>0)\n");
         return -1;
     }
-    int max_level= (int)argv[1];
-    int start_level = (int)argv[2];
-    int scenario = (int)argv[3];
-    printf("\n\nmax: %d, tries: %d, start:%d\n\n", max_level, start_level, scenario);
-    */
+    int max_level= atoi(argv[1]);
+    int start_level = atoi(argv[2]);
+    int scenario = atoi(argv[3]);
+    
+    if (max_level>10 || max_level<1 || start_level>10 || start_level<0 || scenario<1){
+        printf("Please enter input such that:\n"
+               "1 < max level < 10\n"
+               "0 < start level < 10\n"
+               "scenario > 0/n");
+        return -1;
+    }
     
     int j =1;
     int n = total_nodes(max_level);//number of nodes total in tree (virtual and real)
     int bottom = (int) pow(2, max_level);//number of real nodes (bottom level)
-   
+    
     printf("\nNumber of real nodes:\t Number of Scenarios:\t Starting Level:\t\n");
     printf("\t%d \t\t\t %d \t\t\t %d \t\n",bottom,scenario,start_level );
     
@@ -299,13 +299,10 @@ int main(int argc, char* argv[])
     }
     
     /*for statistics*/
-    double successfull=0.0;
-    double attempt = 0.0;
-    double avg =0.0;
-    double direct_probes = 0.0;
-    double success =0.0;
+    double total_probes = 0.0;
+    double success_rate =0.0;
     double totxming =0.0;
-    double col=0.0;
+    double collision_per_test=0.0;
    
     int count =0;
     do{
@@ -321,48 +318,46 @@ int main(int argc, char* argv[])
         /*stores the xming nodes in t[]*/
         int t[ready] ;
         int xming = sizeof(t)/sizeof(int);
-        transmitting(root, bottom, t ,ready);
+        
+        /*define the transmitting nodes from user input*/
+        transmitting(root, start_level, t, ready);
         
         /* calclulate the number of attempts it takes for probes to reach
          the root including collisions */
-        int collisions=0;
+        int collisions=0, sum=0 , tot=0;
+        double success=0.0;
         for (int i = 0; i <ready; ++i) {
             node * test = search (root, t[i]);
             if (test){
-                int at = probe(root, test, t, ready, start_level);
-                collisions = collisions + at;
+                sum += probe(root, test, t, ready, start_level, 0);
+                collisions = collisions+sum;
             }
         }
-        
+        tot=collisions+xming;
+        success  = (double) collisions*100/tot;
+       // printf("\nfailure: %f\tcol: %d\txming: %d\ttot:%d\n",failure, collisions , xming, tot);
+    
         totxming += (double)xming;
-        successfull += (double) xming - collisions;
-        attempt += (double) xming + collisions;
-        avg += (double) attempt / (double) xming;
-        direct_probes += (double)(xming - collisions )* 100/ (double) xming;
-        success += (double) xming * 100/( (double) xming + collisions);
-        col += (double) collisions;
+        total_probes += (double)tot;
+        
+        collision_per_test += (double) collisions;
+        success_rate += (double) success;
         
         t[0] = 0;
         count ++;
     }while(count < scenario);
     
-    
-    successfull = successfull / scenario;
-    attempt = attempt /scenario;
-    avg = avg /scenario;
-    direct_probes = direct_probes /scenario;
-    success = success /scenario;
+    /*compute avg of stats*/
     totxming = totxming /scenario;
-    col = col/scenario;
+    collision_per_test = collision_per_test/scenario;
+    total_probes = total_probes /scenario;
+    success_rate = success_rate/scenario;
+    double failure_rate = 100 - success_rate;
     
     printf("\nAvg number of ready stations:\t%f\n", totxming);
-   
-    printf("Avg collisions per test:\t%f\n", col);
-    printf("Avg rounds per stations:\t%f\n", avg);
-    printf("Avg number of rounds per test:\t%f\n", attempt);
-    printf("Directly Succesfull probes rate:%f percent\n", direct_probes);
-    printf("Average test performance:\t%f percent\n", success);
+    printf("Avg total probes:\t\t%f\n", total_probes);
+    printf("Avg collisions per test:\t%f\n", collision_per_test);
+    printf("\nFailure rate:\t%f\tAvg Test Performance:\t%f\n", failure_rate, success_rate);
 
-    printf("\n --end--\n ");
     return 0;
 }
