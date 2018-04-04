@@ -1,3 +1,26 @@
+Compiling the program:
+Please compile the mac.c file with gcc such as :
+
+		gcc -o mac mac.c 
+
+Run the program with 3 arguments : the total number of levels in the tree (1<10), the start level of the protocol (1<10), number of test scenarios (>0). 
+Example:
+
+		./mac 10 10 100
+
+Results Display:
+The results will be displayed on console as such:
+
+	Number of real nodes:	 Number of Scenarios:	 Starting Level:	
+		1024 			 100 			 10 	
+
+	Avg number of ready stations:	481.700000
+	Avg total probes:		15623.170000
+	Avg collisions per test:	15141.470000
+
+	Failure rate:	37.608753	Avg Test Performance:	62.391247
+
+
 Garance Nicole Loison
 CPSC 441 - Assignment 4 - Adaptive Tree Walk MAC Protocol
 University of Calgary

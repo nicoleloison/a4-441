@@ -1,7 +1,7 @@
 /*
  GARANCE NICOLE LOISON
  ASSIGNMENT 4 - CPSC 441
- BINARY TREE
+ ADAPTIVE TREE WALK PROTOCOL
  */
 
 #include <stdio.h>
@@ -166,14 +166,6 @@ node * get_parent_node(node * root, node * child){
     return NULL;
 }
 
-/*returns the number of tries from original Xming node
-to get to root of three the node */
-int tries (int xming, int tries){
-    tries ++;
-    return tries;
-}
-
-
 /*arr[] array of ids of transmitting nodes, size the number of transmitting nodes
  root the root of tree, child the node we want the parent of*/
 int probe(node * root, node * child, int arr[], int size, int start, int collisions)
@@ -181,6 +173,10 @@ int probe(node * root, node * child, int arr[], int size, int start, int collisi
     node * parent = NULL;
     if (root==NULL || child == NULL)
         return -1;
+    
+    if (start == 0){
+        return 0;
+    }
     
     for (int i = 0; i < size; ++i) {
       
@@ -190,7 +186,8 @@ int probe(node * root, node * child, int arr[], int size, int start, int collisi
             parent = get_parent_node(root, temp);
             if (parent->id == 0){
                 //printf("Got to root from %d\n" ,temp-> id);
-                return collisions;
+                //return collisions;
+                return 0;
             }
             
             else if (parent && parent->data == 0){
@@ -236,11 +233,16 @@ int random_generator(int n){
 
 /*get a random number of nodes with random_int
  and returns each randomly selected with random_int*/
-node * transmitting(node * root,  int n, int arr[], int k){
+node * transmitting(node * root,  int start, int arr[], int k){
     node * transmitting_nodes;
     int i =0;
+    
+    if (start == 0){
+        return root;
+    }
+  
     while (i < k){
-        int key =random_generator(n)+1;
+        int key =random_generator(start)+1;
         node * found = search(root, key);
         if (found != NULL){
             found->data = 1;
@@ -260,16 +262,16 @@ int main(int argc, char* argv[])
     /* reading arguments from user: ./binary maxlevel tries (start) )*/
     if (argc!=4)
     {
-        printf("Please enter 3 arguments: ./binary max_level(1->10) start_level(0->10) scenario(>0)\n");
+        printf("Please enter 3 arguments: ./binary max_level(1->10) start_level(1->10) scenario(>0)\n");
         return -1;
     }
     int max_level= atoi(argv[1]);
     int start_level = atoi(argv[2]);
     int scenario = atoi(argv[3]);
     
-    if (max_level>10 || max_level<1 || start_level>10 || start_level<0 || scenario<1){
+    if (max_level>10 || max_level<0 || start_level>max_level || start_level<0 || scenario<0){
         printf("Please enter input such that:\n"
-               "1 < max level < 10\n"
+               "0 < max level < 10\n"
                "0 < start level < 10\n"
                "scenario > 0/n");
         return -1;
@@ -295,19 +297,19 @@ int main(int argc, char* argv[])
             insert(root,temp);
         
         j++;
-        
     }
     
     /*for statistics*/
     double total_probes = 0.0;
-    double success_rate =0.0;
+    double failure_rate =0.0;
     double totxming =0.0;
     double collision_per_test=0.0;
-   
+    
     int count =0;
     do{
         /*ready = the random number of node transmitting*/
         int ready = (int)(rand()) %  (int)(pow(2, max_level)+1);
+        
         
         while(ready == 0){
             /*in case we end up with no transmitting nodes*/
@@ -325,7 +327,7 @@ int main(int argc, char* argv[])
         /* calclulate the number of attempts it takes for probes to reach
          the root including collisions */
         int collisions=0, sum=0 , tot=0;
-        double success=0.0;
+        double failure=0.0;
         for (int i = 0; i <ready; ++i) {
             node * test = search (root, t[i]);
             if (test){
@@ -334,30 +336,35 @@ int main(int argc, char* argv[])
             }
         }
         tot=collisions+xming;
-        success  = (double) collisions*100/tot;
+        failure  = (double) collisions*100/tot;
        // printf("\nfailure: %f\tcol: %d\txming: %d\ttot:%d\n",failure, collisions , xming, tot);
     
         totxming += (double)xming;
         total_probes += (double)tot;
         
-        collision_per_test += (double) collisions;
-        success_rate += (double) success;
-        
+        collision_per_test += (double) collisions * (start_level);
+        failure_rate += (double) failure;
+
         t[0] = 0;
         count ++;
     }while(count < scenario);
+    
+    
     
     /*compute avg of stats*/
     totxming = totxming /scenario;
     collision_per_test = collision_per_test/scenario;
     total_probes = total_probes /scenario;
-    success_rate = success_rate/scenario;
-    double failure_rate = 100 - success_rate;
+    //failure_rate = 100 - (failure_rate/scenario) ;
+    
+    failure_rate = collision_per_test / (total_probes);
+    double success_rate = 100 - failure_rate;
+
     
     printf("\nAvg number of ready stations:\t%f\n", totxming);
     printf("Avg total probes:\t\t%f\n", total_probes);
     printf("Avg collisions per test:\t%f\n", collision_per_test);
-    printf("\nFailure rate:\t%f\tAvg Test Performance:\t%f\n", failure_rate, success_rate);
+    printf("\nFailure rate:\t%f\tAvg Test Performance:\t%f\n\n\n", failure_rate, success_rate);
 
     return 0;
 }
